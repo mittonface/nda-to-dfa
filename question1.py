@@ -117,15 +117,8 @@ def main():
 
     # output the epsilon closure for the assignment question
     print "EPSILON CLOSURE FOR GIVEN STATES"
-    print "e_close(0) = ", e_close(state, 0, [])
-    print "e_close(1) = ", e_close(state, 1, [])
-    print "e_close(2) = ", e_close(state, 2, [])
-    print "e_close(3) = ", e_close(state, 3, [])
-    print "e_close(4) = ", e_close(state, 4, [])
-    print "e_close(5) = ", e_close(state, 5, [])
-    print "e_close(6) = ", e_close(state, 6, [])
-    print "e_close(7) = ", e_close(state, 7, [])
-    print "e_close(8) = ", e_close(state, 8, [])
+    for i in range(0, len(state)):
+        print "e_close(%s) = %s" % (i, e_close(state, i, []))
 
 
     # output the start state for the DFA
