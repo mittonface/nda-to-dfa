@@ -3,8 +3,8 @@ from sets import Set
 
 
 def main():
-# this seems like a fairly reasonable way to represent states and transitions
-# to me.
+    # this seems like a fairly reasonable way to represent states and transitions
+    # to me.
     state = [None, None, None, None, None, None, None, None, None]
     state[0] = [("b",Set([4])), ("E",Set([1]))]
     state[1] = [("a",Set([2])), ("b",Set([4])), ("E",Set([0]))]
@@ -16,23 +16,105 @@ def main():
     state[7] = [("a",Set([6])), ("b",Set([2]))]
     state[8] = []
 
+    # create a set of e_closed state sets
+    e_closed_states = Set()
+    for s in range(0,9):
+        e_closed_states.add(frozenset(e_close(state, s, [])))
 
-    # step 1 is to find the states of Q_d, which I'll do by e-closing each of the
-    # states of the nda
-    Q_d_list = []
+    dfa = {}
+    # now for each e_closed_state we want to run through each input and 
+    # figure out which state sets they are going to. 
 
-    for i in range(0,9):
-        # sets are mutable, but after this point I dont intend on changing them
-        # so I'll use frozen set which lets me turn this into a set of sets a 
-        # bit later on
-        state_set  = frozenset(e_close(state, i ,[]))
-        Q_d_list.append(state_set)
+    added = True
+
+    # a little inconvenient, since it will loop through sets that it's already
+    # checked before
+    while(added):
+        added=False
+        new_states = Set()
+
+        # do a
+        for s in e_closed_states:
+            dfa[s] = []
+            for n in s:
+                go_to_states = go_to(state, n, "a")
+                if len(go_to_states) > 0:
+
+                    # need to check to see if we already have an a entry
+                    # if we do, we'll be combing the two a entries into one
+                    # state set
+                    new_state = Set()
+                    new_state = new_state.union(go_to_states)
+
+                    modified = None    # used to make sure we can have more
+                    count = 0          # than one "a"
+                    for a_transition in dfa[s]:
+                        if a_transition[0] == "a":
+                            # we already have an a here
+                            new_state = new_state.union(a_transition[1])
+                            modified = count
+                        count += 1
+
+                    new_state = frozenset(new_state) # freeze the set
+
+                    if modified is not None:
+                        dfa[s][modified] = ("a", new_state)
+
+                    # we need to add new sets to the e_closed_states set if 
+                    # we haven't seen this state set before
+                    if new_state not in e_closed_states:
+                        new_states.add(new_state)
+                        added=True
+
+                    # add this to the dfa transition dictionary
+                    # there is a chance that this was already done for us
+                    # by trying to accomplish multiple transitions
+                    if modified is None:
+                        dfa[s].append(("a", new_state))
 
 
-    # I now have a list of e-closed sets, there could be some duplicates though
-    # so I can turn this into a set of sets
-    Q_d_set = set(Q_d_list)
-    print Q_d_set
+        # do b
+        for s in e_closed_states:
+            for n in s:
+                go_to_states = go_to(state, n, "b")
+                if len(go_to_states) > 0:
+                    # need to check to see if we already have an a entry
+                    # if we do, we'll be combing the two a entries into one
+                    # state set
+                    new_state = Set()
+                    new_state = new_state.union(go_to_states)
+
+                    modified = None    # used to make sure we can have more
+                    count = 0          # than one "b"
+                    for a_transition in dfa[s]:
+                        if a_transition[0] == "b":
+                            new_state = new_state.union(a_transition[1])
+                            a_transition = ("b", new_state)
+                            modified = count
+                        count += 1
+
+                    new_state = frozenset(new_state) # freeze the set
+                    if modified is not None:
+                        dfa[s][modified] = ("b", new_state)
+
+                    # we need to add new sets to the e_closed_states set if 
+                    # we haven't seen this state set before
+                    if new_state not in e_closed_states:
+                        new_states.add(new_state)
+                        added=True
+
+                    # lets add this to the dfa transition dictionary now
+                    if modified is None:
+                        dfa[s].append(("b", new_state))
+
+
+        for new in new_states:
+            e_closed_states.add(frozenset(new))
+
+
+
+    for key in dfa:
+        print key, dfa[key]
 
 # do a little bit of recursing to figure out the epsilon closure for the given
 # number. This should be fine for most problems, but python has a little bit
@@ -45,6 +127,25 @@ def e_close(state, num, visited):
                 for j in i[1]:
                     e_close(state, j, visited)
     return visited
+
+# given a state and a character return the states that this state will go to
+def go_to(state, num, character):
+    out_list = []
+    for i in state[num]:
+        if i[0] == character:
+            for j in i[1]:
+                out_list.append(j)
+
+    final_set = Set()
+    for out in out_list:
+        # get the e_close set for each transitioned to state
+        temp_set = Set(e_close(state, out, []))
+
+        # add new elements to the final set
+        final_set = final_set.union(temp_set)
+
+    return frozenset(final_set)
+
 
 def check_for_key(state, key):
     for i in state:
