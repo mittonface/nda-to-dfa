@@ -16,6 +16,9 @@ def main():
     state[7] = [("a",Set([6])), ("b",Set([2]))]
     state[8] = []
 
+    init_states = [0, 1]
+    goal_states = [4, 5]
+
     # create a set of e_closed state sets
     e_closed_states = Set()
     for s in range(0,9):
@@ -112,10 +115,65 @@ def main():
             e_closed_states.add(frozenset(new))
 
 
+    # output the epsilon closure for the assignment question
+    print "EPSILON CLOSURE FOR GIVEN STATES"
+    print "e_close(0) = ", e_close(state, 0, [])
+    print "e_close(1) = ", e_close(state, 1, [])
+    print "e_close(2) = ", e_close(state, 2, [])
+    print "e_close(3) = ", e_close(state, 3, [])
+    print "e_close(4) = ", e_close(state, 4, [])
+    print "e_close(5) = ", e_close(state, 5, [])
+    print "e_close(6) = ", e_close(state, 6, [])
+    print "e_close(7) = ", e_close(state, 7, [])
+    print "e_close(8) = ", e_close(state, 8, [])
 
+
+    # output the start state for the DFA
+    print
+    print "INITIAL STATE" 
+
+    # start state will be a union of the e_closures of the given
+    # initial states
+    dfa_start = Set()
+    for i in init_states:
+        dfa_start = dfa_start.union(e_close(state, i, []))
+
+    print list(dfa_start)
+    print
+    # output the final states for the dfa
+    # this will be all states that contain the final state
+    print "FINAL STATES"
+
+    for i in goal_states:
+        for s in e_closed_states:
+            if i in s:
+                print list(s)
+    print
+
+    # time to print out the transitions. I'll try to keep this pretty... somehow
+    print "TRANSITIONS"
+
+
+    print "%-20s %-20s %-20s" % ("State", "a", "b")
     for key in dfa:
-        print key, dfa[key]
+        if len(dfa[key]) > 0:
+            print "%-20s %-20s %-20s" % (list(key), print_a(dfa[key]), print_b(dfa[key]))
+        else:
+            print "%-20s %-20s %-20s" % (list(key), "--", "--")
 
+# find the a tuple and print it if it exists
+def print_a(row):
+    for t in row:
+        if t[0] == "a":
+            return list(t[1])
+    return "--"
+# find the b tuple and return it if it exists
+def print_b(row):
+    for t in row:
+        if t[0] == "b":
+            return list(t[1])
+
+    return "--"
 # do a little bit of recursing to figure out the epsilon closure for the given
 # number. This should be fine for most problems, but python has a little bit
 # of an issue with recursion
