@@ -1,0 +1,30 @@
+EPSILON CLOSURE FOR GIVEN STATES
+e_close(0) = [0, 1]
+e_close(1) = [1, 0]
+e_close(2) = [2]
+e_close(3) = [3]
+e_close(4) = [4, 8]
+e_close(5) = [5, 8, 6]
+e_close(6) = [6, 8, 5]
+e_close(7) = [7]
+e_close(8) = [8]
+
+INITIAL STATE
+[0, 1]
+
+FINAL STATES
+[8, 4]
+[8, 3, 4]
+[8, 5, 6]
+
+TRANSITIONS
+State                a                    b                   
+[7]                  [8, 5, 6]            [2]                 
+[8, 4]               [8, 5, 6]            [7]                 
+[8, 5, 6]            [8, 3]               [8]                 
+[3]                  [8, 5, 6]            --                  
+[8]                  --                   --                  
+[8, 3]               [8, 5, 6]            --                  
+[8, 3, 4]            [8, 5, 6]            [7]                 
+[2]                  [8, 3, 4]            [8, 5, 6]           
+[0, 1]               [2]                  [8, 4]              
